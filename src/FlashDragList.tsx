@@ -2,7 +2,7 @@ import React, { FunctionComponent, useCallback, useState, useEffect, useRef } fr
 import { LayoutChangeEvent } from 'react-native'
 import { FlashList, FlashListProps } from "@shopify/flash-list"
 import { GestureDetector, Gesture, createNativeWrapper } from 'react-native-gesture-handler'
-import Animated, { useSharedValue, runOnJS, useAnimatedScrollHandler } from 'react-native-reanimated'
+import Animated, { useSharedValue, runOnJS, useAnimatedStyle, useAnimatedScrollHandler } from 'react-native-reanimated'
 import ItemWrapper from './ItemWrapper'
 
 const GestureFlashList = createNativeWrapper(FlashList)
@@ -67,8 +67,8 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   }
 
   const beginDrag = useCallback((index: number) => {
-    setActive(true)
     activeIndex.value = index
+    setActive(true)
   }, [])
 
   useEffect(() => {
@@ -79,9 +79,9 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
         offset: scroll.value + (autoScrollSpeed.value * (props.autoScrollSpeed ?? 1) * autoScrollAcc.value),
         animated: false
       })
-      autoScrollAcc.value = Math.min(6, autoScrollAcc.value + 0.01),
+      autoScrollAcc.value = Math.min(6, autoScrollAcc.value + 0.01)
       pan.value = panAbs.value - panOffset.value - (panScroll.value - scroll.value)
-    }, 10)
+    }, 16)
     return () => {
       clearInterval(scrollInterval)
     }
@@ -99,12 +99,16 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   .enabled(layout !== null)
   .shouldCancelWhenOutside(false)
   .onBegin((evt) => {
+    if(activeIndex.value >= 0)
+      return
     panAbs.value = evt.absoluteY
     panScroll.value = scroll.value
     panOffset.value = panAbs.value
     insertIndex.value = Math.max(0, ((scroll.value + panAbs.value - (layout?.y || 0)) / itemsSize) - 0.5)
   })
   .onUpdate((evt) => {
+    if(activeIndex.value < 0)
+      return
     panAbs.value = evt.absoluteY
     pan.value = panAbs.value - panOffset.value - (panScroll.value - scroll.value)
     insertIndex.value = Math.max(0, ((scroll.value + panAbs.value - (layout?.y || 0)) / itemsSize) - 0.5)
@@ -135,6 +139,23 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     return props.renderItem(item, index, () => beginDrag(index))
   }
 
+  const draggingAnimatedStyle = useAnimatedStyle(() => {
+    if(activeIndex.value < 0) {
+      return {
+        opacity: 0,
+        transform: [{
+          translateY: 0
+        }]
+      }
+    }
+    return {
+      opacity: 1,
+      transform: [{
+        translateY: panAbs.value - (layout?.y || 0) - (itemsSize / 2)
+      }]
+    }
+  }, [layout?.y, itemsSize])
+
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View
@@ -162,6 +183,18 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           onScroll={scrollHandler}
           scrollEventThrottle={16}
         />
+        { active && <Animated.View
+          pointerEvents="none"
+          style={[{
+            position: 'absolute',
+            top: 0,
+            width: '100%',
+            height: itemsSize,
+            backgroundColor: 'red'
+          }, draggingAnimatedStyle]}
+        >
+          { props.renderItem(data[activeIndex.value], activeIndex.value, () => {})}
+        </Animated.View> }
       </Animated.View>
     </GestureDetector>
   )

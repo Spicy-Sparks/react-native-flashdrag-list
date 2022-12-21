@@ -62,17 +62,19 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
   const animatedStyle = useAnimatedStyle(() => {
     if(activeIndex.value === index) {
       return {
+        opacity: 0,
         transform: [{
-          translateY: pan.value
+          translateY: 0
         }]
       }
     }
     return {
+      opacity: 1,
       transform: [{
         translateY: position.value
       }]
     }
-  }, [])
+  }, [index])
 
   return (
     <AnimatedCellContainer
