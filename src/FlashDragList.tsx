@@ -12,7 +12,8 @@ type Props = Omit<FlashListProps<any>, "renderItem"> & {
   data: Array<any>,
   itemsSize: number,
   onSort?: (fromIndex: number, toIndex: number) => any,
-  renderItem: (item: any, index: number, beginDrag: () => any) => JSX.Element
+  renderItem: (item: any, index: number, beginDrag: () => any) => JSX.Element,
+  autoScrollSpeed?: number
 }
 
 type Layout = {
@@ -41,6 +42,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
 
   const scroll = useSharedValue(0)
   const autoScrollSpeed = useSharedValue(0)
+  const autoScrollAcc = useSharedValue(1)
 
   const pan = useSharedValue(0)
   const panAbs = useSharedValue(0)
@@ -60,6 +62,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     activeIndex.value = -1
     insertIndex.value = -1
     autoScrollSpeed.value = 0
+    autoScrollAcc.value = 1
     props.onSort?.(fromIndex, toIndex)
   }
 
@@ -73,9 +76,10 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
       if(!scrollview.current || autoScrollSpeed.value === 0)
         return
       scrollview.current.scrollToOffset({
-        offset: scroll.value + autoScrollSpeed.value,
+        offset: scroll.value + (autoScrollSpeed.value * (props.autoScrollSpeed ?? 1) * autoScrollAcc.value),
         animated: false
       })
+      autoScrollAcc.value = Math.min(6, autoScrollAcc.value + 0.01),
       pan.value = panAbs.value - panOffset.value - (panScroll.value - scroll.value)
     }, 10)
     return () => {
@@ -109,10 +113,15 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
         autoScrollSpeed.value = 3
       else if(panAbs.value < layout.y + 100)
         autoScrollSpeed.value = -3
-      else
+      else {
+        autoScrollAcc.value = 0
         autoScrollSpeed.value = 0
+      }
     }
-    else autoScrollSpeed.value = 0
+    else {
+      autoScrollAcc.value = 0
+      autoScrollSpeed.value = 0
+    }
   })
   .onEnd(() => {
     if(activeIndex.value < 0)
