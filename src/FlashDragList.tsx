@@ -176,6 +176,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
             activeIndex={activeIndex}
             insertIndex={insertIndex}
             height={itemsSize}
+            active={active}
           /> }
           estimatedItemSize={props.estimatedItemSize ?? itemsSize}
           scrollEnabled={(props.scrollEnabled ?? true) && !active}

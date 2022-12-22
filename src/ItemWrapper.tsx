@@ -1,4 +1,4 @@
-import React, { forwardRef, PropsWithChildren } from 'react'
+import React, { forwardRef, PropsWithChildren, useEffect } from 'react'
 import { ViewStyle } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, useAnimatedReaction } from 'react-native-reanimated'
 import { CellContainer } from '@shopify/flash-list'
@@ -10,11 +10,13 @@ type Props = PropsWithChildren<{
   activeIndex: Animated.SharedValue<number>,
   insertIndex: Animated.SharedValue<number>,
   height: number,
+  active: boolean,
   style?: ViewStyle
 }>
 
 const ItemWrapper = forwardRef<any, Props>((props, ref) => {
   const {
+    active,
     height,
     insertIndex,
     activeIndex,
@@ -35,6 +37,11 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
       zIndex: 0
     }
   }, [activeIndex, index])
+
+  useEffect(() => {
+    if(!active && position.value !== 0)
+      position.value = withSpring(0)
+  }, [active])
 
   useAnimatedReaction(() => {
     return insertIndex.value
