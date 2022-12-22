@@ -176,7 +176,6 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
             activeIndex={activeIndex}
             insertIndex={insertIndex}
             height={itemsSize}
-            pan={pan}
           /> }
           estimatedItemSize={props.estimatedItemSize ?? itemsSize}
           scrollEnabled={(props.scrollEnabled ?? true) && !active}
@@ -189,11 +188,14 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
             position: 'absolute',
             top: 0,
             width: '100%',
-            height: itemsSize,
-            backgroundColor: 'red'
+            height: itemsSize
           }, draggingAnimatedStyle]}
         >
-          { props.renderItem(data[activeIndex.value], activeIndex.value, () => {})}
+          { props.renderItem(
+            data[Math.max(0, activeIndex.value)],
+            Math.max(0, activeIndex.value),
+            () => {}
+          )}
         </Animated.View> }
       </Animated.View>
     </GestureDetector>

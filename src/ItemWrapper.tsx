@@ -10,13 +10,11 @@ type Props = PropsWithChildren<{
   activeIndex: Animated.SharedValue<number>,
   insertIndex: Animated.SharedValue<number>,
   height: number,
-  pan: Animated.SharedValue<number>,
   style?: ViewStyle
 }>
 
 const ItemWrapper = forwardRef<any, Props>((props, ref) => {
   const {
-    pan,
     height,
     insertIndex,
     activeIndex,
@@ -42,7 +40,8 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
     return insertIndex.value
   }, (newInsertIndex) => {
     if(newInsertIndex < 0 || activeIndex.value < 0) {
-      position.value = withSpring(0)
+      if(position.value !== 0)
+        position.value = withSpring(0)
       return
     }
     else if(index > activeIndex.value && index <= newInsertIndex + 0.5) {
@@ -54,7 +53,8 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
       return
     }
     else {
-      position.value = withSpring(0)
+      if(position.value !== 0)
+        position.value = withSpring(0)
       return
     }
   }, [index, height])
