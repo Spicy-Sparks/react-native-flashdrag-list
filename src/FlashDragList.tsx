@@ -50,10 +50,13 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const panOffset = useSharedValue(0)
 
   const endDrag = (fromIndex: number, toIndex: number) => {
-    const copy = [...data]
-    const removed = copy.splice(fromIndex, 1)
-    copy.splice(toIndex, 0, removed[0])
-    setData(copy)
+    const changed = fromIndex !== toIndex
+    if(changed) {
+      const copy = [...data]
+      const removed = copy.splice(fromIndex, 1)
+      copy.splice(toIndex, 0, removed[0])
+      setData(copy)
+    }
     setActive(false)
     pan.value = 0
     panOffset.value = 0
@@ -63,7 +66,8 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     insertIndex.value = -1
     autoScrollSpeed.value = 0
     autoScrollAcc.value = 1
-    props.onSort?.(fromIndex, toIndex)
+    if(changed)
+      props.onSort?.(fromIndex, toIndex)
   }
 
   const beginDrag = useCallback((index: number) => {
@@ -101,21 +105,21 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   .onBegin((evt) => {
     if(activeIndex.value >= 0)
       return
-    panAbs.value = evt.absoluteY
+    panAbs.value = evt.y
     panScroll.value = scroll.value
     panOffset.value = panAbs.value
-    insertIndex.value = Math.max(0, ((scroll.value + panAbs.value - (layout?.y || 0)) / itemsSize) - 0.5)
+    insertIndex.value = Math.max(0, ((scroll.value + panAbs.value) / itemsSize) - 0.5)
   })
   .onUpdate((evt) => {
     if(activeIndex.value < 0)
       return
-    panAbs.value = evt.absoluteY
+    panAbs.value = evt.y
     pan.value = panAbs.value - panOffset.value - (panScroll.value - scroll.value)
-    insertIndex.value = Math.max(0, ((scroll.value + panAbs.value - (layout?.y || 0)) / itemsSize) - 0.5)
+    insertIndex.value = Math.max(0, ((scroll.value + panAbs.value) / itemsSize) - 0.5)
     if(layout) {
-      if(panAbs.value >= layout.y + layout.height - 100)
+      if(panAbs.value >= layout.height - 100)
         autoScrollSpeed.value = 3
-      else if(panAbs.value < layout.y + 100)
+      else if(panAbs.value < 100)
         autoScrollSpeed.value = -3
       else {
         autoScrollAcc.value = 0
@@ -151,10 +155,10 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     return {
       opacity: 1,
       transform: [{
-        translateY: panAbs.value - (layout?.y || 0) - (itemsSize / 2)
+        translateY: panAbs.value - (itemsSize / 2)
       }]
     }
-  }, [layout?.y, itemsSize])
+  }, [itemsSize])
 
   return (
     <GestureDetector gesture={panGesture}>
