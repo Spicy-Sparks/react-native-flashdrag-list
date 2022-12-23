@@ -174,7 +174,6 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           ref={scrollview}
           data={data}
           renderItem={renderItem}
-          keyExtractor={(item: any) => item.title}
           CellRendererComponent={(props) => <ItemWrapper
             { ...props }
             activeIndex={activeIndex}
