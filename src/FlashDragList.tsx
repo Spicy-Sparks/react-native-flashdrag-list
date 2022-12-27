@@ -105,7 +105,10 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   .onBegin((evt) => {
     if(activeIndex.value >= 0)
       return
-    panAbs.value = evt.y
+    let panAbsValue = Math.max(itemsSize / 2, evt.y)
+    if(layout?.height)
+      panAbsValue = Math.min(layout.height - itemsSize / 2, panAbsValue)
+    panAbs.value = panAbsValue
     panScroll.value = scroll.value
     panOffset.value = panAbs.value
     insertIndex.value = Math.max(0, ((scroll.value + panAbs.value) / itemsSize) - 0.5)
@@ -113,7 +116,10 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   .onUpdate((evt) => {
     if(activeIndex.value < 0)
       return
-    panAbs.value = evt.y
+    let panAbsValue = Math.max(itemsSize / 2, evt.y)
+    if(layout?.height)
+      panAbsValue = Math.min(layout.height - itemsSize / 2, panAbsValue)
+    panAbs.value = panAbsValue
     pan.value = panAbs.value - panOffset.value - (panScroll.value - scroll.value)
     insertIndex.value = Math.max(0, ((scroll.value + panAbs.value) / itemsSize) - 0.5)
     if(layout) {
