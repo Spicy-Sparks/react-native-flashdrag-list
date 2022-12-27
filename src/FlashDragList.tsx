@@ -100,8 +100,15 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   }, [])
 
   const panGesture = Gesture.Pan()
+  .manualActivation(true)
   .enabled(layout !== null)
   .shouldCancelWhenOutside(false)
+  .onTouchesMove((_evt, stateManager) => {
+    if (activeIndex.value >= 0)
+      stateManager.activate()
+    else
+      stateManager.fail()
+  })
   .onBegin((evt) => {
     if(activeIndex.value >= 0)
       return
