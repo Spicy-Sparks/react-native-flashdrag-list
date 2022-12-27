@@ -48,15 +48,17 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
   }, (newInsertIndex) => {
     if(newInsertIndex < 0 || activeIndex.value < 0) {
       if(position.value !== 0)
-        position.value = withSpring(0)
+        position.value = 0
       return
     }
     else if(index > activeIndex.value && index <= newInsertIndex + 0.5) {
-      position.value = withSpring(-height)
+      if(position.value !== -height)
+        position.value = withSpring(-height)
       return
     }
     else if(index < activeIndex.value && index >= newInsertIndex - 0.5) {
-      position.value = withSpring(height)
+      if(position.value !== height)
+        position.value = withSpring(height)
       return
     }
     else {

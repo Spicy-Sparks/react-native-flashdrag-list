@@ -67,7 +67,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     autoScrollSpeed.value = 0
     autoScrollAcc.value = 1
     if(changed)
-      props.onSort?.(fromIndex, toIndex)
+      setTimeout(() => props.onSort?.(fromIndex, toIndex), 10)
   }
 
   const beginDrag = useCallback((index: number) => {
@@ -174,8 +174,8 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           ref={scrollview}
           data={data}
           renderItem={renderItem}
-          CellRendererComponent={(props) => <ItemWrapper
-            { ...props }
+          CellRendererComponent={(rowProps) => <ItemWrapper
+            { ...rowProps }
             activeIndex={activeIndex}
             insertIndex={insertIndex}
             height={itemsSize}
