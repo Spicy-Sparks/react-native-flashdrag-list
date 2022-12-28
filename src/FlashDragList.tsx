@@ -12,7 +12,7 @@ type Props = Omit<FlashListProps<any>, "renderItem"> & {
   data: Array<any>,
   itemsSize: number,
   onSort?: (fromIndex: number, toIndex: number) => any,
-  renderItem: (item: any, index: number, beginDrag: () => any) => JSX.Element,
+  renderItem: (item: any, index: number, active: boolean, beginDrag: () => any) => JSX.Element,
   autoScrollSpeed?: number
 }
 
@@ -153,7 +153,12 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   })
 
   const renderItem = ({ item, index }: any) => {
-    return props.renderItem(item, index, () => beginDrag(index))
+    return props.renderItem(
+      item,
+      index,
+      activeIndex.value === index,
+      () => beginDrag(index)
+    )
   }
 
   const draggingAnimatedStyle = useAnimatedStyle(() => {
@@ -198,6 +203,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           scrollEnabled={(props.scrollEnabled ?? true) && !active}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
+          extraData={active}
         />
         { active && <Animated.View
           pointerEvents="none"
@@ -211,6 +217,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           { props.renderItem(
             data[Math.max(0, activeIndex.value)],
             Math.max(0, activeIndex.value),
+            true,
             () => {}
           )}
         </Animated.View> }

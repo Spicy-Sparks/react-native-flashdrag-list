@@ -30,7 +30,7 @@ const App = () => {
     setData(copy)
   }
 
-  const renderItem = (item: Item, index: number, beginDrag: () => any) => {
+  const renderItem = (item: Item, index: number, isActive: boolean, beginDrag: () => any) => {
     return (
       <TouchableOpacity
         onLongPress={beginDrag}
@@ -48,7 +48,7 @@ const App = () => {
             fontWeight: 'bold'
           }}
           key={index}
-        >{item.title}</Text>
+        >{item.title}{isActive ? ' (active)' : ''}</Text>
       </TouchableOpacity>
     )
   }
