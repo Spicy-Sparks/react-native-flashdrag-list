@@ -34,11 +34,13 @@ const App = () => {
     return (
       <TouchableOpacity
         onLongPress={beginDrag}
+        activeOpacity={0.9}
         style={{
           width: '100%',
           height: ITEM_HEIGHT,
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
+          paddingHorizontal: '10%',
           backgroundColor: item.color
         }}
       >

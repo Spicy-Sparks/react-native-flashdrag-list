@@ -25,19 +25,6 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
 
   const position = useSharedValue(0)
 
-  const animatedStyleWrapper = useAnimatedStyle(() => {
-    if(activeIndex.value === index) {
-      return {
-        elevation: 1,
-        zIndex: 999999
-      }
-    }
-    return {
-      elevation: 0,
-      zIndex: 0
-    }
-  }, [activeIndex, index])
-
   useEffect(() => {
     if(!active && position.value !== 0)
       position.value = withSpring(0)
@@ -47,18 +34,15 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
     return insertIndex.value
   }, (newInsertIndex) => {
     if(newInsertIndex < 0 || activeIndex.value < 0) {
-      if(position.value !== 0)
-        position.value = 0
+      position.value = 0
       return
     }
     else if(index > activeIndex.value && index <= newInsertIndex + 0.5) {
-      if(position.value !== -height)
-        position.value = withSpring(-height)
+      position.value = withSpring(-height)
       return
     }
     else if(index < activeIndex.value && index >= newInsertIndex - 0.5) {
-      if(position.value !== height)
-        position.value = withSpring(height)
+      position.value = withSpring(height)
       return
     }
     else {
@@ -66,10 +50,10 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
         position.value = withSpring(0)
       return
     }
-  }, [index, height])
+  }, [index, height, active])
 
   const animatedStyle = useAnimatedStyle(() => {
-    if(activeIndex.value === index) {
+    if(active && activeIndex.value === index) {
       return {
         opacity: 0,
         transform: [{
@@ -83,13 +67,13 @@ const ItemWrapper = forwardRef<any, Props>((props, ref) => {
         translateY: position.value
       }]
     }
-  }, [index])
+  }, [index, active])
 
   return (
     <AnimatedCellContainer
       ref={ref}
       {...props}
-      style={[props.style, animatedStyleWrapper]}
+      style={props.style}
     >
       <Animated.View style={animatedStyle}>
         { props.children }

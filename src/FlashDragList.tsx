@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback, useState, useEffect, useRef } from 'react'
+import React, { FunctionComponent, useCallback, useMemo, useState, useEffect, useRef } from 'react'
 import { LayoutChangeEvent } from 'react-native'
 import { FlashList, FlashListProps } from "@shopify/flash-list"
 import { GestureDetector, Gesture, createNativeWrapper } from 'react-native-gesture-handler'
@@ -49,6 +49,8 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const panScroll = useSharedValue(0)
   const panOffset = useSharedValue(0)
 
+  const [ resettedState, setResettedState ] = useState(true)
+
   const endDrag = (fromIndex: number, toIndex: number) => {
     const changed = fromIndex !== toIndex
     if(changed) {
@@ -66,13 +68,17 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     insertIndex.value = -1
     autoScrollSpeed.value = 0
     autoScrollAcc.value = 1
-    if(changed)
-      setTimeout(() => props.onSort?.(fromIndex, toIndex), 10)
+    setTimeout(() => {
+      setResettedState(true)
+      if(changed)
+        props.onSort?.(fromIndex, toIndex)
+    }, 10)
   }
 
   const beginDrag = useCallback((index: number) => {
     activeIndex.value = index
     setActive(true)
+    setResettedState(false)
   }, [])
 
   useEffect(() => {
@@ -152,6 +158,11 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     runOnJS(endDrag)(fromIndex, toIndex)
   })
 
+  const extraData = useMemo(() => ({
+    active,
+    resettedState
+  }), [active, resettedState])
+
   const renderItem = ({ item, index }: any) => {
     return props.renderItem(
       item,
@@ -203,9 +214,9 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           scrollEnabled={(props.scrollEnabled ?? true) && !active}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
-          extraData={active}
+          extraData={extraData}
         />
-        { active && <Animated.View
+        { active && !resettedState && <Animated.View
           pointerEvents="none"
           style={[{
             position: 'absolute',
