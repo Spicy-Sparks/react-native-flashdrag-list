@@ -27,10 +27,14 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const { itemsSize } = props
 
   const [ data, setData ] = useState(props.data)
+  const [ updatedData, setUpdatedData ] = useState(true)
 
   useEffect(() => {
-    setData(data)
-  }, [])
+    if(updatedData)
+      return
+    setData(props.data)
+    setUpdatedData(true)
+  })
 
   const [ layout, setLayout ] = useState<Layout | null>(null)
 
@@ -49,8 +53,6 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const panScroll = useSharedValue(0)
   const panOffset = useSharedValue(0)
 
-  const [ resettedState, setResettedState ] = useState(true)
-
   const endDrag = (fromIndex: number, toIndex: number) => {
     const changed = fromIndex !== toIndex
     if(changed) {
@@ -59,7 +61,6 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
       copy.splice(toIndex, 0, removed[0])
       setData(copy)
     }
-    setActive(false)
     pan.value = 0
     panOffset.value = 0
     panAbs.value = -1
@@ -68,17 +69,15 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     insertIndex.value = -1
     autoScrollSpeed.value = 0
     autoScrollAcc.value = 1
-    setTimeout(() => {
-      setResettedState(true)
-      if(changed)
-        props.onSort?.(fromIndex, toIndex)
-    }, 10)
+    setActive(false)
+    if(changed)
+      props.onSort?.(fromIndex, toIndex)
+    setImmediate(() => setUpdatedData(false))
   }
 
   const beginDrag = useCallback((index: number) => {
     activeIndex.value = index
     setActive(true)
-    setResettedState(false)
   }, [])
 
   useEffect(() => {
@@ -159,9 +158,8 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   })
 
   const extraData = useMemo(() => ({
-    active,
-    resettedState
-  }), [active, resettedState])
+    active
+  }), [active])
 
   const renderItem = ({ item, index }: any) => {
     return props.renderItem(
@@ -216,7 +214,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           scrollEventThrottle={16}
           extraData={extraData}
         />
-        { active && !resettedState && <Animated.View
+        { (active && updatedData) && <Animated.View
           pointerEvents="none"
           style={[{
             position: 'absolute',
