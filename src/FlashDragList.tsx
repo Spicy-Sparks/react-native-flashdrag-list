@@ -27,13 +27,12 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const { itemsSize } = props
 
   const [ data, setData ] = useState(props.data)
-  const [ updatedData, setUpdatedData ] = useState(true)
+  const avoidDataUpdate = useRef(false)
 
   useEffect(() => {
-    if(updatedData)
+    if(avoidDataUpdate.current)
       return
     setData(props.data)
-    setUpdatedData(true)
   })
 
   const [ layout, setLayout ] = useState<Layout | null>(null)
@@ -55,6 +54,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
 
   const endDrag = (fromIndex: number, toIndex: number) => {
     const changed = fromIndex !== toIndex
+    avoidDataUpdate.current = true
     if(changed) {
       const copy = [...data]
       const removed = copy.splice(fromIndex, 1)
@@ -72,7 +72,9 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     setActive(false)
     if(changed)
       props.onSort?.(fromIndex, toIndex)
-    setImmediate(() => setUpdatedData(false))
+    setImmediate(() => {
+      avoidDataUpdate.current = false
+    })
   }
 
   const beginDrag = useCallback((index: number) => {
@@ -214,7 +216,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           scrollEventThrottle={16}
           extraData={extraData}
         />
-        { (active && updatedData) && <Animated.View
+        { active && <Animated.View
           pointerEvents="none"
           style={[{
             position: 'absolute',
