@@ -70,10 +70,10 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     autoScrollSpeed.value = 0
     autoScrollAcc.value = 1
     setActive(false)
-    if(changed)
-      props.onSort?.(fromIndex, toIndex)
     setImmediate(() => {
       avoidDataUpdate.current = false
+      if(changed)
+        props.onSort?.(fromIndex, toIndex)
     })
   }
 
