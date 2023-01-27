@@ -46,6 +46,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const scroll = useSharedValue(0)
   const autoScrollSpeed = useSharedValue(0)
   const autoScrollAcc = useSharedValue(1)
+  const scrollInterval = useRef<NodeJS.Timeout | null>(null)
 
   const pan = useSharedValue(0)
   const panAbs = useSharedValue(0)
@@ -83,20 +84,27 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   }, [])
 
   useEffect(() => {
-    const scrollInterval = setInterval(() => {
-      if(!scrollview.current || autoScrollSpeed.value === 0)
-        return
-      scrollview.current.scrollToOffset({
-        offset: scroll.value + (autoScrollSpeed.value * (props.autoScrollSpeed ?? 1) * autoScrollAcc.value),
-        animated: false
-      })
-      autoScrollAcc.value = Math.min(6, autoScrollAcc.value + 0.01)
-      pan.value = panAbs.value - panOffset.value - (panScroll.value - scroll.value)
-    }, 16)
-    return () => {
-      clearInterval(scrollInterval)
+    if(active) {
+      if(!scrollInterval.current) {
+        scrollInterval.current = setInterval(() => {
+          if(!scrollview.current || autoScrollSpeed.value === 0)
+            return
+          scrollview.current.scrollToOffset({
+            offset: scroll.value + (autoScrollSpeed.value * (props.autoScrollSpeed ?? 1) * autoScrollAcc.value),
+            animated: false
+          })
+          autoScrollAcc.value = Math.min(6, autoScrollAcc.value + 0.01)
+          pan.value = panAbs.value - panOffset.value - (panScroll.value - scroll.value)
+        }, 16)
+      }
     }
-  }, [])
+    else {
+      if(scrollInterval.current) {
+        clearInterval(scrollInterval.current)
+        scrollInterval.current = null
+      }
+    }
+  }, [active])
 
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scroll.value = event.contentOffset.y
