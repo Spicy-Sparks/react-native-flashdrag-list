@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useCallback, useMemo, useState, useEffect, useRef } from 'react'
-import { LayoutChangeEvent } from 'react-native'
+import { LayoutChangeEvent, Platform } from 'react-native'
 import { FlashList, FlashListProps } from "@shopify/flash-list"
 import { GestureDetector, Gesture, createNativeWrapper } from 'react-native-gesture-handler'
 import Animated, { useSharedValue, runOnJS, useAnimatedStyle, useAnimatedScrollHandler } from 'react-native-reanimated'
@@ -28,6 +28,8 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
 
   const [ data, setData ] = useState(props.data)
   const avoidDataUpdate = useRef(false)
+
+  const isIOS = Platform.OS === 'ios'
 
   useEffect(() => {
     if(avoidDataUpdate.current)
@@ -116,16 +118,18 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const onLayout = useCallback((evt: LayoutChangeEvent) => {
     setLayout(evt.nativeEvent.layout)
   }, [])
-
+  
   const panGesture = Gesture.Pan()
-  .manualActivation(true)
+  .manualActivation(isIOS)
   .enabled(layout !== null)
   .shouldCancelWhenOutside(false)
   .onTouchesMove((_evt, stateManager) => {
-    if (activeIndex.value >= 0)
+    if(!isIOS)
+      return
+    if (active || activeIndexState >= 0 || activeIndex.value >= 0)
       stateManager.activate()
-    else
-      stateManager.fail()
+    else 
+      stateManager.end()
   })
   .onBegin((evt) => {
     if(activeIndex.value >= 0)
