@@ -16,7 +16,7 @@
     "react-dom": "18.1.0",
     "react-native": "0.70.5",
     "react-native-gesture-handler": "^2.8.0",
-    "react-native-reanimated": "^2.13.0",
+    "react-native-reanimated": "^3.0.2",
     "react-native-web": "~0.18.9"
   },
   "devDependencies": {

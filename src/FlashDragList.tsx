@@ -40,6 +40,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const scrollview = useRef<FlashList<any>>(null)
 
   const activeIndex = useSharedValue(-1)
+  const [ activeIndexState, setActiveIndexState ] = useState(-1)
   const [ active, setActive ] = useState(false)
   const insertIndex = useSharedValue(-1)
 
@@ -67,6 +68,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
     panAbs.value = -1
     panScroll.value = 0
     activeIndex.value = -1
+    setActiveIndexState(-1)
     insertIndex.value = -1
     autoScrollSpeed.value = 0
     autoScrollAcc.value = 1
@@ -80,9 +82,10 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
 
   const beginDrag = useCallback((index: number) => {
     activeIndex.value = index
+    setActiveIndexState(index)
     setActive(true)
   }, [])
-
+  
   useEffect(() => {
     if(active) {
       if(!scrollInterval.current) {
@@ -234,12 +237,12 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           }, draggingAnimatedStyle]}
         >
           { props.renderItem(
-            data[Math.max(0, activeIndex.value)],
-            Math.max(0, activeIndex.value),
+            data[Math.max(0, activeIndexState)],
+            Math.max(0, activeIndexState),
             true,
             () => {}
           )}
-        </Animated.View> }
+          </Animated.View> }
       </Animated.View>
     </GestureDetector>
   )
