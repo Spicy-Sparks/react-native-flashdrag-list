@@ -20,6 +20,7 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useAnimatedScrollHandler,
+  withTiming,
 } from 'react-native-reanimated';
 import ItemWrapper from './ItemWrapper';
 
@@ -71,36 +72,40 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const scroll = useSharedValue(0);
   const autoScrollSpeed = useSharedValue(0);
   const autoScrollAcc = useSharedValue(1);
-  const scrollInterval = useRef<NodeJS.Timeout | null>(null);
+  const scrollInterval = useRef<NodeJS.Timeout | number | null>(null);
 
-  const pan = useSharedValue(0);
   const panAbs = useSharedValue(0);
   const panScroll = useSharedValue(0);
   const panOffset = useSharedValue(0);
 
   const endDrag = (fromIndex: number, toIndex: number) => {
-    const changed = fromIndex !== toIndex;
-    avoidDataUpdate.current = true;
-    if (changed) {
-      const copy = [...data];
-      const removed = copy.splice(fromIndex, 1);
-      copy.splice(toIndex, 0, removed[0]);
-      setData(copy);
-    }
-    pan.value = 0;
-    panOffset.value = 0;
-    panAbs.value = -1;
-    panScroll.value = 0;
-    activeIndex.value = -1;
-    setActiveIndexState(-1);
-    insertIndex.value = -1;
-    autoScrollSpeed.value = 0;
-    autoScrollAcc.value = 1;
-    setActive(false);
-    setImmediate(() => {
-      avoidDataUpdate.current = false;
-      if (changed) props.onSort?.(fromIndex, toIndex);
-    });
+    const endAnimationDuration = 300
+    panAbs.value = withTiming((toIndex * itemsSize) + (itemsSize / 2) - scroll.value, {
+      duration: endAnimationDuration
+    })
+    setTimeout(() => {
+      const changed = fromIndex !== toIndex;
+      avoidDataUpdate.current = true;
+      if (changed) {
+        const copy = [...data];
+        const removed = copy.splice(fromIndex, 1);
+        copy.splice(toIndex, 0, removed[0]);
+        setData(copy);
+      }
+      panOffset.value = 0;
+      panAbs.value = -1;
+      panScroll.value = 0;
+      activeIndex.value = -1;
+      setActiveIndexState(-1);
+      insertIndex.value = -1;
+      autoScrollSpeed.value = 0;
+      autoScrollAcc.value = 1;
+      setActive(false);
+      setImmediate(() => {
+        avoidDataUpdate.current = false;
+        if (changed) props.onSort?.(fromIndex, toIndex);
+      });
+    }, endAnimationDuration + 1)
   };
 
   const beginDrag = useCallback((index: number) => {
@@ -123,8 +128,6 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
             animated: false,
           });
           autoScrollAcc.value = Math.min(6, autoScrollAcc.value + 0.01);
-          pan.value =
-            panAbs.value - panOffset.value - (panScroll.value - scroll.value);
         }, 16);
       }
     } else {
@@ -172,8 +175,6 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
       if (layout?.height)
         panAbsValue = Math.min(layout.height - itemsSize / 2, panAbsValue);
       panAbs.value = panAbsValue;
-      pan.value =
-        panAbs.value - panOffset.value - (panScroll.value - scroll.value);
       insertIndex.value = Math.max(
         0,
         (scroll.value + panAbs.value) / itemsSize - 0.5
