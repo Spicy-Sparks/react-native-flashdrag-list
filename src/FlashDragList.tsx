@@ -67,12 +67,15 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const activeIndex = useSharedValue(-1);
   const [activeIndexState, setActiveIndexState] = useState(-1);
   const [active, setActive] = useState(false);
+  const [callOnSort, setCallOnSort] = useState(false);
   const insertIndex = useSharedValue(-1);
 
   const scroll = useSharedValue(0);
   const autoScrollSpeed = useSharedValue(0);
   const autoScrollAcc = useSharedValue(1);
   const scrollInterval = useRef<NodeJS.Timeout | number | null>(null);
+  const fromIndexRef = useRef<number>(-1)
+  const toIndexRef = useRef<number>(-1)
 
   const panAbs = useSharedValue(0);
   const panScroll = useSharedValue(0);
@@ -101,12 +104,21 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
       autoScrollSpeed.value = 0;
       autoScrollAcc.value = 1;
       setActive(false);
-      setImmediate(() => {
-        avoidDataUpdate.current = false;
-        if (changed) props.onSort?.(fromIndex, toIndex);
-      });
+      fromIndexRef.current = fromIndex
+      toIndexRef.current = toIndex
+      if(changed) {
+        setCallOnSort(true)
+      }
     }, endAnimationDuration + 1)
   };
+  
+  useEffect(() => {
+    if(!callOnSort || fromIndexRef.current < 0 || toIndexRef.current < 0)
+      return
+    avoidDataUpdate.current = false;
+    props.onSort?.(fromIndexRef.current, toIndexRef.current);
+    setCallOnSort(true);
+  }, [callOnSort])
 
   const beginDrag = useCallback((index: number) => {
     activeIndex.value = index;
@@ -206,7 +218,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   );
 
   const renderItem = ({ item, index }: any) => {
-    return props.renderItem(item, index, activeIndex.value === index, () =>
+    return props.renderItem(item, index, active && activeIndex.value === index, () =>
       beginDrag(index)
     );
   };
