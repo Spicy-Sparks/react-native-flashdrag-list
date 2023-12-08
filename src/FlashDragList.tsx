@@ -104,10 +104,10 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
       autoScrollSpeed.value = 0;
       autoScrollAcc.value = 1;
       setActive(false);
-      fromIndexRef.current = fromIndex
-      toIndexRef.current = toIndex
+      fromIndexRef.current = fromIndex;
+      toIndexRef.current = toIndex;
       if(changed) {
-        setCallOnSort(true)
+        setCallOnSort(true);
       }
     }, endAnimationDuration + 1)
   };
@@ -123,7 +123,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
   const beginDrag = useCallback((index: number) => {
     activeIndex.value = index;
     setActiveIndexState(index);
-    setActive(true);
+    setActive(false);
   }, []);
 
   useEffect(() => {
