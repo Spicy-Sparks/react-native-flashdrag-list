@@ -117,13 +117,13 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
       return
     avoidDataUpdate.current = false;
     props.onSort?.(fromIndexRef.current, toIndexRef.current);
-    setCallOnSort(true);
+    setCallOnSort(false);
   }, [callOnSort])
 
   const beginDrag = useCallback((index: number) => {
     activeIndex.value = index;
     setActiveIndexState(index);
-    setActive(false);
+    setActive(true);
   }, []);
 
   useEffect(() => {
