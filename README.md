@@ -28,7 +28,13 @@ const App = () => {
 
   const [ data, setData ] = useState(() => {
     return new Array(NUM_ITEMS).fill("").map((_, i) => {
-      const colors = [ '#493548', '#4B4E6D', '#6A8D92', '#80B192', '#A1E887' ]
+      const colors = [
+        '#493548',
+        '#4B4E6D',
+        '#6A8D92',
+        '#80B192',
+        '#A1E887'
+      ]
       return {
         title: "Item " + i,
         color: colors[Math.round(i % colors.length)]
@@ -43,7 +49,12 @@ const App = () => {
     setData(copy)
   }
 
-  const renderItem = (item: Item, index: number, beginDrag: () => any) => {
+  const renderItem = (
+    item: Item,
+    index: number,
+    active: boolean,
+    beginDrag: () => any
+  ) => {
     return (
       <TouchableOpacity
         onLongPress={beginDrag}
