@@ -106,9 +106,7 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
       setActive(false);
       fromIndexRef.current = fromIndex;
       toIndexRef.current = toIndex;
-      if(changed) {
-        setCallOnSort(true);
-      }
+      setCallOnSort(true);
     }, endAnimationDuration + 1)
   };
   
