@@ -258,15 +258,17 @@ const FlashDragList: FunctionComponent<Props> = (props) => {
           ref={scrollview}
           data={data}
           renderItem={renderItem}
-          CellRendererComponent={(rowProps) => (
+          CellRendererComponent={React.forwardRef((cellProps, ref) => (
             <ItemWrapper
-              {...rowProps}
+              {...cellProps}
+              ref={ref}
               activeIndex={activeIndex}
               insertIndex={insertIndex}
+              index={cellProps.index}
               height={itemsSize}
               active={active}
             />
-          )}
+          ))}
           estimatedItemSize={props.estimatedItemSize ?? itemsSize}
           scrollEnabled={(props.scrollEnabled ?? true) && !active}
           onScroll={scrollHandler}
