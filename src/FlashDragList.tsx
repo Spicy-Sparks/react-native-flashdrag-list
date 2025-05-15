@@ -12,7 +12,6 @@ import { FlashList, FlashListProps } from '@shopify/flash-list';
 import {
   GestureDetector,
   Gesture,
-  createNativeWrapper,
   ScrollView,
 } from 'react-native-gesture-handler';
 import Animated, {
@@ -24,8 +23,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import ItemWrapper from './ItemWrapper';
 
-const GestureFlashList = createNativeWrapper(FlashList);
-const AnimatedFlashList = Animated.createAnimatedComponent(GestureFlashList);
+// const GestureFlashList = createNativeWrapper(FlashList);
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
 type Props = Omit<FlashListProps<any>, 'renderItem'> & {
   data: Array<any>;
